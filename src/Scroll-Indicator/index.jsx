@@ -1,5 +1,5 @@
-import { useEffect } from "react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import "./scroll.css";
 
 export default function ScrollIndicator({ url }) {
   const [data, setData] = useState([]);
@@ -12,7 +12,6 @@ export default function ScrollIndicator({ url }) {
       setLoading(true);
       const response = await fetch(getUrl);
       const data = await response.json();
-
       if (data && data.products && data.products.length > 0) {
         setData(data.products);
         setLoading(false);
@@ -22,7 +21,12 @@ export default function ScrollIndicator({ url }) {
       setErrorMessage(e.message);
     }
   }
-  const handleScrollPercentage = () => {
+
+  useEffect(() => {
+    fetchData(url);
+  }, [url]);
+
+  function handleScrollPercentage() {
     console.log(
       document.body.scrollTop,
       document.documentElement.scrollTop,
@@ -38,11 +42,7 @@ export default function ScrollIndicator({ url }) {
       document.documentElement.clientHeight;
 
     setScrollPercentage((howMuchScrolled / height) * 100);
-  };
-
-  useEffect(() => {
-    fetchData(url);
-  }, [url]);
+  }
 
   useEffect(() => {
     window.addEventListener("scroll", handleScrollPercentage);
@@ -52,7 +52,15 @@ export default function ScrollIndicator({ url }) {
     };
   }, []);
 
-  // console.log(data, loading);
+  // console.log(data, scrollPercentage);
+
+  if (errorMessage) {
+    return <div>Error ! {errorMessage}</div>;
+  }
+
+  if (loading) {
+    return <div>Loading data ! Pleaae wait</div>;
+  }
 
   return (
     <div>
@@ -60,12 +68,11 @@ export default function ScrollIndicator({ url }) {
         <h1>Custom Scroll Indicator</h1>
         <div className="scroll-progress-tracking-container">
           <div
-            className="current-progress-work"
-            style={{ width: `${scrollPercentage}` }}
+            className="current-progress-bar"
+            style={{ width: `${scrollPercentage}%` }}
           ></div>
         </div>
       </div>
-
       <div className="data-container">
         {data && data.length > 0
           ? data.map((dataItem) => <p>{dataItem.title}</p>)
